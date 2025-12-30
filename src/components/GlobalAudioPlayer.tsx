@@ -1,0 +1,191 @@
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, ChevronUp, ChevronDown } from 'lucide-react';
+import { useAudio } from '@/contexts/AudioContext';
+
+export function GlobalAudioPlayer() {
+    const audio = useAudio();
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isMinimized, setIsMinimized] = useState(false);
+
+    // Don't render if no lecture is loaded
+    if (!audio.currentLecture) return null;
+
+    const formatTime = (time: number) => {
+        if (isNaN(time)) return '0:00';
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const progress = audio.duration > 0 ? (audio.currentTime / audio.duration) * 100 : 0;
+
+    const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!audio.duration) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const percent = (e.clientX - rect.left) / rect.width;
+        audio.seek(percent * audio.duration);
+    };
+
+    if (isMinimized) {
+        // Minimized floating button
+        return (
+            <button
+                onClick={() => setIsMinimized(false)}
+                className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-sage-500 to-sage-600 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all hover:scale-105"
+            >
+                {audio.isPlaying ? (
+                    <div className="relative">
+                        <div className="absolute inset-0 rounded-full animate-ping opacity-30 bg-white" />
+                        <Pause className="w-6 h-6" />
+                    </div>
+                ) : (
+                    <Play className="w-6 h-6 ml-0.5" />
+                )}
+            </button>
+        );
+    }
+
+    return (
+        <div className="fixed bottom-0 left-0 right-0 z-50">
+            {/* Main player bar */}
+            <div className="bg-background/95 backdrop-blur-lg border-t border-neutral-200 dark:border-neutral-800 shadow-lg">
+                {/* Progress bar at top */}
+                <div
+                    className="h-1 bg-neutral-200 dark:bg-neutral-700 cursor-pointer group"
+                    onClick={handleSeek}
+                >
+                    <div
+                        className="h-full bg-gradient-to-r from-sage-400 to-sage-500 transition-all duration-150 relative"
+                        style={{ width: `${progress}%` }}
+                    >
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-sage-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 py-3">
+                    <div className="flex items-center gap-4">
+                        {/* Play controls */}
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => audio.skip(-15)}
+                                className="btn-icon"
+                                title="Skip back 15s"
+                            >
+                                <SkipBack className="w-4 h-4" />
+                            </button>
+
+                            <button
+                                onClick={() => audio.isPlaying ? audio.pause() : audio.resume()}
+                                className="w-12 h-12 rounded-full flex items-center justify-center transition-all bg-gradient-to-br from-sage-500 to-sage-600 hover:from-sage-600 hover:to-sage-700 text-white shadow-md hover:shadow-lg"
+                            >
+                                {audio.isPlaying ? (
+                                    <Pause className="w-5 h-5" />
+                                ) : (
+                                    <Play className="w-5 h-5 ml-0.5" />
+                                )}
+                            </button>
+
+                            <button
+                                onClick={() => audio.skip(15)}
+                                className="btn-icon"
+                                title="Skip forward 15s"
+                            >
+                                <SkipForward className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Time */}
+                        <div className="text-xs text-foreground-muted font-medium tabular-nums min-w-[100px]">
+                            {formatTime(audio.currentTime)} / {formatTime(audio.duration)}
+                        </div>
+
+                        {/* Lecture info */}
+                        <div className="flex-1 min-w-0">
+                            <Link
+                                href="/lectures"
+                                className="block group"
+                            >
+                                <p className="text-sm font-medium text-foreground truncate group-hover:text-sage-600 dark:group-hover:text-sage-400 transition-colors">
+                                    {audio.currentLecture.title}
+                                </p>
+                                <p className="text-xs text-foreground-muted truncate">
+                                    Chapter {audio.currentLecture.chapter} • {audio.currentLecture.verseRange}
+                                </p>
+                            </Link>
+                        </div>
+
+                        {/* Volume */}
+                        <div className="hidden sm:flex items-center gap-2">
+                            <button
+                                onClick={() => audio.toggleMute()}
+                                className="text-foreground-muted hover:text-foreground transition-colors"
+                            >
+                                {audio.isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                            </button>
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.1"
+                                value={audio.isMuted ? 0 : audio.volume}
+                                onChange={(e) => audio.setVolume(parseFloat(e.target.value))}
+                                className="w-20"
+                            />
+                        </div>
+
+                        {/* Expand/minimize controls */}
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => setIsExpanded(!isExpanded)}
+                                className="btn-icon"
+                                title={isExpanded ? 'Collapse' : 'Expand'}
+                            >
+                                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                            </button>
+                            <button
+                                onClick={() => setIsMinimized(true)}
+                                className="btn-icon"
+                                title="Minimize"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Expanded content */}
+                    {isExpanded && (
+                        <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+                            <div className="flex items-start gap-4">
+                                {/* Chapter badge */}
+                                <div className="w-16 h-16 rounded-xl bg-sage-100 dark:bg-sage-900 flex items-center justify-center text-sage-600 dark:text-sage-400 font-bold text-xl flex-shrink-0">
+                                    {audio.currentLecture.chapter}
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-foreground mb-1">
+                                        {audio.currentLecture.title}
+                                    </h4>
+                                    <p className="text-sm text-foreground-muted">
+                                        📍 {audio.currentLecture.location} • {audio.currentLecture.date}
+                                    </p>
+
+                                    <div className="mt-3 flex items-center gap-3">
+                                        <Link
+                                            href="/lectures"
+                                            className="text-sm text-sage-600 dark:text-sage-400 hover:underline"
+                                        >
+                                            View in library →
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
