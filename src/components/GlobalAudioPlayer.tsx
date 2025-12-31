@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, ChevronUp, ChevronDown, Gauge } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 
 export function GlobalAudioPlayer() {
