@@ -39,7 +39,7 @@ export function Layout({ children }: LayoutProps) {
                                 <BookOpen className="w-5 h-5" />
                             </div>
                             <div className="hidden sm:block">
-                                <h1 className="font-semibold text-foreground">Kirtanam Sadhana</h1>
+                                <h1 className="font-semibold text-foreground">Shravanam</h1>
                                 <p className="text-xs text-foreground-muted">Spiritual Audio Library</p>
                             </div>
                         </Link>

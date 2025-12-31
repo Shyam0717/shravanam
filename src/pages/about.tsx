@@ -6,7 +6,7 @@ export default function AboutPage() {
     return (
         <div className="max-w-4xl mx-auto py-8 lg:py-12">
             <div className="text-center mb-12">
-                <h1 className="heading-1 text-3xl mb-4">About Kirtanam Sadhana</h1>
+                <h1 className="heading-1 text-3xl mb-4">About Shravanam</h1>
                 <p className="text-lg text-foreground-muted max-w-2xl mx-auto">
                     A dedicated space for spiritual growth through the transcendental teachings of His Divine Grace A.C. Bhaktivedanta Swami Prabhupada.
                 </p>

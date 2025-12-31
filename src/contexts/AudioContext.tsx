@@ -11,6 +11,7 @@ interface AudioState {
     duration: number;
     volume: number;
     isMuted: boolean;
+    playbackRate: number;
 }
 
 interface AudioContextType extends AudioState {
@@ -22,6 +23,7 @@ interface AudioContextType extends AudioState {
     setVolume: (volume: number) => void;
     toggleMute: () => void;
     skip: (seconds: number) => void;
+    setPlaybackRate: (rate: number) => void;
 }
 
 const AudioContext = createContext<AudioContextType | null>(null);
@@ -49,6 +51,7 @@ export function AudioProvider({ children, onLectureComplete }: AudioProviderProp
         duration: 0,
         volume: 1,
         isMuted: false,
+        playbackRate: 1,
     });
 
     // Initialize audio element
@@ -147,11 +150,16 @@ export function AudioProvider({ children, onLectureComplete }: AudioProviderProp
             setState(prev => ({ ...prev, isPlaying: false }));
         };
 
+        const handleRateChange = () => {
+            setState(prev => ({ ...prev, playbackRate: audio.playbackRate }));
+        };
+
         audio.addEventListener('timeupdate', handleTimeUpdate);
         audio.addEventListener('durationchange', handleDurationChange);
         audio.addEventListener('ended', handleEnded);
         audio.addEventListener('play', handlePlay);
         audio.addEventListener('pause', handlePause);
+        audio.addEventListener('ratechange', handleRateChange);
 
         return () => {
             audio.removeEventListener('timeupdate', handleTimeUpdate);
@@ -159,6 +167,7 @@ export function AudioProvider({ children, onLectureComplete }: AudioProviderProp
             audio.removeEventListener('ended', handleEnded);
             audio.removeEventListener('play', handlePlay);
             audio.removeEventListener('pause', handlePause);
+            audio.removeEventListener('ratechange', handleRateChange);
             audio.pause();
             audio.src = '';
         };
@@ -177,6 +186,9 @@ export function AudioProvider({ children, onLectureComplete }: AudioProviderProp
         // Load new lecture
         audio.src = lecture.audioUrl;
         audio.load();
+        // Restore playback rate
+        audio.playbackRate = state.playbackRate;
+
         setState(prev => ({
             ...prev,
             currentLecture: lecture,
@@ -184,7 +196,7 @@ export function AudioProvider({ children, onLectureComplete }: AudioProviderProp
             duration: 0,
         }));
         audio.play().catch(console.error);
-    }, [state.currentLecture?.id]);
+    }, [state.currentLecture?.id, state.playbackRate]);
 
     const pause = useCallback(() => {
         audioRef.current?.pause();
@@ -236,8 +248,18 @@ export function AudioProvider({ children, onLectureComplete }: AudioProviderProp
     const skip = useCallback((seconds: number) => {
         const audio = audioRef.current;
         if (audio) {
-            const newTime = audio.currentTime + seconds;
-            audio.currentTime = Math.max(0, Math.min(newTime, audio.duration || 0));
+            let newTime = audio.currentTime + seconds;
+            // Prevent seeking beyond duration or before 0
+            newTime = Math.max(0, Math.min(newTime, audio.duration || 0));
+            audio.currentTime = newTime;
+        }
+    }, []);
+
+    const setPlaybackRate = useCallback((rate: number) => {
+        const audio = audioRef.current;
+        if (audio) {
+            audio.playbackRate = rate;
+            setState(prev => ({ ...prev, playbackRate: rate }));
         }
     }, []);
 
@@ -251,6 +273,7 @@ export function AudioProvider({ children, onLectureComplete }: AudioProviderProp
         setVolume,
         toggleMute,
         skip,
+        setPlaybackRate,
     };
 
     return (

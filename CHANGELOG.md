@@ -3,7 +3,7 @@
 ## [1.0.0] - 2025-12-31
 
 ### 🎉 Initial Release
-Version 1.0 of **Kirtanam Sadhana** is now live! This release focuses on providing a solid foundation for personal hearing practice.
+Version 1.0 of **Shravanam** is now live! This release focuses on providing a solid foundation for personal hearing practice.
 
 ### Added
 - **Core Architecture**:

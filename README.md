@@ -1,6 +1,6 @@
-# Kirtanam Sadhana 📿
+# Shravanam 📿
 
-**Kirtanam Sadhana** is a dedicated spiritual audio library designed to help devotees and seekers cultivate a consistent habit of hearing (*shravanam*) the transcendental teachings of **His Divine Grace A.C. Bhaktivedanta Swami Prabhupada**.
+**Shravanam** is a dedicated spiritual audio library designed to help devotees and seekers cultivate a consistent habit of hearing (*shravanam*) the transcendental teachings of **His Divine Grace A.C. Bhaktivedanta Swami Prabhupada**.
 
 This application is built with a focus on privacy, simplicity, and a distraction-free experience.
 

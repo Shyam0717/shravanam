@@ -18,6 +18,8 @@ export function AudioPlayer({ src, onPlay, onPause, isPlaying, compact = false }
     const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
     const [isAudioLoaded, setIsAudioLoaded] = useState(false);
+    const [playbackRate, setPlaybackRate] = useState(1);
+    const [showSpeedMenu, setShowSpeedMenu] = useState(false);
 
     useEffect(() => {
         const audio = new Audio();
@@ -82,6 +84,13 @@ export function AudioPlayer({ src, onPlay, onPause, isPlaying, compact = false }
         audioRef.current.volume = newVolume;
     };
 
+    const handleSpeedChange = (rate: number) => {
+        if (!audioRef.current) return;
+        audioRef.current.playbackRate = rate;
+        setPlaybackRate(rate);
+        setShowSpeedMenu(false);
+    };
+
     const skip = (seconds: number) => {
         if (!audioRef.current) return;
         audioRef.current.currentTime = Math.max(0, Math.min(duration, audioRef.current.currentTime + seconds));
@@ -142,23 +151,50 @@ export function AudioPlayer({ src, onPlay, onPause, isPlaying, compact = false }
                 </div>
             </div>
 
-            {/* Volume controls */}
-            <div className="flex items-center gap-2 pl-14">
-                <button
-                    onClick={toggleMute}
-                    className="text-foreground-muted hover:text-foreground transition-colors"
-                >
-                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                </button>
-                <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={volume}
-                    onChange={handleVolumeChange}
-                    className="w-20"
-                />
+            {/* Volume and Speed controls */}
+            <div className="flex items-center justify-between pl-14">
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={toggleMute}
+                        className="text-foreground-muted hover:text-foreground transition-colors"
+                    >
+                        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    </button>
+                    <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={volume}
+                        onChange={handleVolumeChange}
+                        className="w-20"
+                    />
+                </div>
+
+                {/* Playback Speed */}
+                <div className="relative">
+                    <button
+                        onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                        className="btn-icon text-xs font-medium w-9"
+                        title="Playback Speed"
+                    >
+                        {playbackRate}x
+                    </button>
+
+                    {showSpeedMenu && (
+                        <div className="absolute bottom-full right-0 mb-2 bg-white dark:bg-neutral-800 rounded-lg shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 min-w-[100px] z-50">
+                            {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                                <button
+                                    key={rate}
+                                    onClick={() => handleSpeedChange(rate)}
+                                    className={`w-full px-4 py-2 text-sm text-left hover:bg-neutral-100 dark:hover:bg-neutral-700 ${playbackRate === rate ? 'text-sage-600 dark:text-sage-400 font-medium' : 'text-foreground'}`}
+                                >
+                                    {rate}x
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

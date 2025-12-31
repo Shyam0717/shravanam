@@ -20,7 +20,7 @@ const DEFAULT_STORAGE: UserStorage = {
     listenedLectures: [],
     bookmarkedLectures: [],
     notes: {},
-    dailyGoal: 15,
+    dailyGoal: 30,
     streak: {
         current: 0,
         longest: 0,

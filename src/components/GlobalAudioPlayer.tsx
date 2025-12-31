@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, ChevronUp, ChevronDown } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, X, ChevronUp, ChevronDown, Gauge } from 'lucide-react';
 import { useAudio } from '@/contexts/AudioContext';
 
 export function GlobalAudioPlayer() {
     const audio = useAudio();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
+    const [showSpeedMenu, setShowSpeedMenu] = useState(false);
 
     // Don't render if no lecture is loaded
     if (!audio.currentLecture) return null;
@@ -115,6 +116,34 @@ export function GlobalAudioPlayer() {
                                     Chapter {audio.currentLecture.chapter} • {audio.currentLecture.verseRange}
                                 </p>
                             </Link>
+                        </div>
+
+                        {/* Playback Speed */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                                className="btn-icon text-xs font-medium w-9"
+                                title="Playback Speed"
+                            >
+                                {audio.playbackRate}x
+                            </button>
+
+                            {showSpeedMenu && (
+                                <div className="absolute bottom-full right-0 mb-2 bg-white dark:bg-neutral-800 rounded-lg shadow-xl border border-neutral-200 dark:border-neutral-700 py-1 min-w-[100px] z-50">
+                                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                                        <button
+                                            key={rate}
+                                            onClick={() => {
+                                                audio.setPlaybackRate(rate);
+                                                setShowSpeedMenu(false);
+                                            }}
+                                            className={`w-full px-4 py-2 text-sm text-left hover:bg-neutral-100 dark:hover:bg-neutral-700 ${audio.playbackRate === rate ? 'text-sage-600 dark:text-sage-400 font-medium' : 'text-foreground'}`}
+                                        >
+                                            {rate}x
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Volume */}
