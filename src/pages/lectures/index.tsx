@@ -10,7 +10,7 @@ import { useUserStorage } from '@/lib/useUserStorage';
 // Import static data
 import bgLecturesRaw from '@/data/bg_lectures.json';
 
-const bgLectures = bgLecturesRaw as Lecture[];
+const bgLectures = (bgLecturesRaw as Lecture[]).map((l, i) => ({ ...l, id: i + 10000 })); // Offset to avoid potential conflict if IDs existed
 
 export default function LectureListPage() {
   const { data, update } = useUserStorage();
@@ -106,6 +106,20 @@ export default function LectureListPage() {
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-neutral-50/30 dark:bg-neutral-950/30">
         <div className="max-w-5xl mx-auto p-4 lg:p-8">
+          {/* Mobile Chapter Navigation */}
+          <div className="lg:hidden mb-6">
+            <select
+              value={selectedChapter || ''}
+              onChange={(e) => setSelectedChapter(e.target.value ? Number(e.target.value) : null)}
+              className="w-full p-2 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+            >
+              <option value="">All Chapters</option>
+              {chapters.map(chapter => (
+                <option key={chapter} value={chapter}>Chapter {chapter}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Header & Filters */}
           <div className="mb-6 space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

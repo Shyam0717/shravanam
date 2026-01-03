@@ -59,8 +59,10 @@ export function Layout({ children }: LayoutProps) {
                                             : 'text-foreground-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800'
                                             }`}
                                     >
-                                        <Icon className="w-4 h-4" />
-                                        <span className="hidden sm:inline">{item.label}</span>
+                                        <Icon className={`w-4 h-4 ${['BG', 'SB', 'NOD'].includes(item.label) ? 'hidden sm:block' : ''}`} />
+                                        <span className={`${['BG', 'SB', 'NOD'].includes(item.label) ? 'text-xs font-bold sm:font-normal sm:text-sm' : 'hidden sm:inline'}`}>
+                                            {item.label}
+                                        </span>
                                     </Link>
                                 );
                             })}

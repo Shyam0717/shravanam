@@ -9,11 +9,12 @@ import { useUserStorage } from '@/lib/useUserStorage';
 // Import static data
 import nodLecturesRaw from '@/data/nod_lectures.json';
 
-const nodLectures = nodLecturesRaw as NODLecture[];
+const nodLectures = (nodLecturesRaw as NODLecture[]).map((l, i) => ({ ...l, id: i + 30000 })); // Offset 30000
 
 export default function NODLecturesPage() {
     const { data, update } = useUserStorage();
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedChapter, setSelectedChapter] = useState<number | null>(null);
     const [filterType, setFilterType] = useState<FilterType>('all');
     // const [showFilters, setShowFilters] = useState(false);
 
@@ -26,9 +27,15 @@ export default function NODLecturesPage() {
         }
     }, []);
 
+    // Get unique chapters
+    const chapters = Array.from(new Set(nodLectures.map(l => l.chapter).filter(c => c !== null))).sort((a, b) => (a as number) - (b as number)) as number[];
+
     // Filter lectures
     const filteredLectures = nodLectures.filter(lecture => {
-        // 1. Search filter
+        // 1. Chapter filter
+        if (selectedChapter && lecture.chapter !== selectedChapter) return false;
+
+        // 2. Search filter
         if (searchTerm) {
             const query = searchTerm.toLowerCase();
             const matchesTitle = lecture.title.toLowerCase().includes(query);
@@ -36,7 +43,7 @@ export default function NODLecturesPage() {
             if (!matchesTitle && !matchesLocation) return false;
         }
 
-        // 2. Status filter
+        // 3. Status filter
         if (filterType === 'listened' && !data.listenedLectures.includes(lecture.id)) return false;
         if (filterType === 'unlistened' && data.listenedLectures.includes(lecture.id)) return false;
         if (filterType === 'bookmarked' && !data.bookmarkedLectures.includes(lecture.id)) return false;
@@ -108,6 +115,20 @@ export default function NODLecturesPage() {
                             </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Mobile Chapter Navigation */}
+                <div className="lg:hidden mb-6">
+                    <select
+                        value={selectedChapter || ''}
+                        onChange={(e) => setSelectedChapter(e.target.value ? Number(e.target.value) : null)}
+                        className="w-full p-2 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                    >
+                        <option value="">All Chapters</option>
+                        {chapters.map(chapter => (
+                            <option key={chapter} value={chapter}>Chapter {chapter}</option>
+                        ))}
+                    </select>
                 </div>
 
                 {/* Search and Filter */}

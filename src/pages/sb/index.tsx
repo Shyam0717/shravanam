@@ -9,7 +9,7 @@ import { useUserStorage } from '@/lib/useUserStorage';
 // Import static data
 import sbLecturesRaw from '@/data/sb_lectures.json';
 
-const sbLectures = sbLecturesRaw as SBLecture[];
+const sbLectures = (sbLecturesRaw as SBLecture[]).map((l, i) => ({ ...l, id: i + 20000 })); // Offset 20000
 
 // Canto Navigation Component
 function CantoNavigation({
@@ -170,6 +170,20 @@ export default function SBLecturesPage() {
             {/* Main Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar bg-neutral-50/30 dark:bg-neutral-950/30">
                 <div className="max-w-5xl mx-auto p-4 lg:p-8">
+                    {/* Mobile Chapter Navigation */}
+                    <div className="lg:hidden mb-6">
+                        <select
+                            value={selectedCanto || ''}
+                            onChange={(e) => setSelectedCanto(e.target.value ? Number(e.target.value) : null)}
+                            className="w-full p-2 rounded-xl bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                        >
+                            <option value="">All Cantos</option>
+                            {cantos.map(canto => (
+                                <option key={canto} value={canto}>Canto {canto}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     {/* Header & Filters */}
                     <div className="mb-6 space-y-4">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
